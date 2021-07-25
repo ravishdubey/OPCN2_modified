@@ -1,0 +1,40 @@
+import time
+import datetime
+import Adafruit_DHT
+from usbiss.spi import SPI
+import opc
+from time import sleep
+def on_connect(client, data, flags, rc):
+    print('Connected: ' + str(rc))
+ts = time.time()
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+f = open('/home/pi/Desktop/csvfiles/'+st+'.csv', 'w')
+f.write('date_time'+','+'Temparature'+','+'humidity'+','+'Temp_opcn2'+','+'6.5um'+','+'sfr'+','+'10um'+','+'12um'+','+'14um'+','+'16um'+','+'PM2.5'+','+'Bin1MTOF'+','+'Pressure'+','+'8um'+','+'Bin5MTOF'+','+'PM1'+','+'Bin7MTOF'+','+'Checksum'+','+'Bin3MTOF'+','+'PM10'+','+'4um'+','+'5um'+','+'2.1um'+','+'3um'+','+'1.3um'+','+'1.6um'+','+'0.78um'+','+'1um'+','+'0.38um'+','+'0.54um'+','+'samplingPeriod'+'\n')
+#init OPCN2
+# Build the connector
+spi = SPI("/dev/ttyACM0")
+# Set the SPI mode and clock speed
+spi.mode = 1
+spi.max_speed_hz = 500000
+alpha = opc.OPCN2(spi)
+#  Turn on the device
+alpha.on()
+while True:
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+       humidity, temperature = Adafruit_DHT.read_retry(11, 17)
+ # Turn the device off
+    #alpha.off()
+    raw_string = str(st)+','+str(temperature)+','+str(humidity)
+    #f.write(str(st)+','+str(alt)+','+str(tem)+','+str(humidity)+','+str(pre)+'\n')
+    print ("humidity : %.2f " %humidity)
+    print ("temperature : %.2f " %temperature)
+    print (st)
+        for key, value in alpha.histogram().items():
+        #from the string 
+        raw_string = raw_string + ',' + str(value)
+        print ("Key: {}\tValue: {}".format(key, value)) #print "PM2.5_MPL : %.2f m" %
+       f.write(raw_string + '\n')
+    print ("*******************************************************")
+out_f.close()
+sys.exit(1)
